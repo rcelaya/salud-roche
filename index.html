@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salud Ricardo Celaya · 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0f0f0e;
+    --bg2: #1a1a18;
+    --bg3: #222220;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8e6df;
+    --muted: #888780;
+    --accent: #c8a96e;
+    --accent2: #e07a5f;
+    --good: #6bbf8e;
+    --warn: #e8a14a;
+    --bad: #e07a5f;
+    --blue: #7eb0d4;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 48px 60px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(200,169,110,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .header-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-family: var(--serif);
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .header h1 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+  .header-meta {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.9;
+  }
+  .header-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 8px;
+    max-width: 560px;
+  }
+
+  /* NAV TABS */
+  .nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 60px;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 16px 24px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    user-select: none;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 40px 60px 60px; }
+  .section.active { display: block; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 400;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+  .section-title em { color: var(--accent); font-style: italic; }
+  .section-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 36px;
+    max-width: 600px;
+    line-height: 1.7;
+  }
+
+  /* METRIC GRID */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .metric-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 12px 12px 0 0;
+  }
+  .metric-card.good::after { background: var(--good); }
+  .metric-card.warn::after { background: var(--warn); }
+  .metric-card.bad::after { background: var(--bad); }
+  .metric-card.neutral::after { background: var(--blue); }
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .metric-value {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .metric-value.good { color: var(--good); }
+  .metric-value.warn { color: var(--warn); }
+  .metric-value.bad { color: var(--bad); }
+  .metric-value.neutral { color: var(--blue); }
+  .metric-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* CHART CARD */
+  .chart-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .chart-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .chart-title span { color: var(--accent); }
+  .chart-wrap { position: relative; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .data-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* BAR ROWS */
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .bar-label { font-size: 12px; color: var(--muted); min-width: 80px; }
+  .bar-track { flex: 1; background: var(--bg3); border-radius: 4px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 10px; border-radius: 4px; }
+  .bar-val { font-family: var(--mono); font-size: 11px; color: var(--text); min-width: 40px; text-align: right; }
+
+  /* INSIGHT CARD */
+  .insight-card {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    background: rgba(200,169,110,0.04);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .insight-card.warn { border-left-color: var(--warn); background: rgba(232,161,74,0.04); }
+  .insight-card.bad  { border-left-color: var(--bad);  background: rgba(224,122,95,0.04); }
+  .insight-card.good { border-left-color: var(--good); background: rgba(107,191,142,0.04); }
+  .insight-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .insight-title.warn { color: var(--warn); }
+  .insight-title.bad  { color: var(--bad); }
+  .insight-title.good { color: var(--good); }
+  .insight-title.neutral { color: var(--accent); }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 60px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ANIMATION */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .section.active { animation: fadeIn 0.25s ease; }
+
+  /* PILL */
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
+  }
+  .pill.bad  { background: rgba(224,122,95,0.15); color: var(--bad); }
+  .pill.good { background: rgba(107,191,142,0.15); color: var(--good); }
+  .pill.warn { background: rgba(232,161,74,0.15); color: var(--warn); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-label">Análisis de salud y nutrición</div>
+      <h1>Ricardo <em>Celaya</em></h1>
+    </div>
+    <div class="header-meta">
+      RC · 42 años<br>
+      Cancún, México<br>
+      Datos: 2015 – 2026<br>
+      Generado: marzo 2026
+    </div>
+  </div>
+  <p class="header-sub">10 checkups médicos + 11 años de registro nutricional y de ejercicio analizados. Objetivo: mejores indicadores a los 50 que a los 42.</p>
+</div>
+
+<nav class="nav">
+  <button class="nav-tab active" onclick="showTab('resumen')">Resumen general</button>
+  <button class="nav-tab" onclick="showTab('grasa')">Grasa saturada</button>
+  <button class="nav-tab" onclick="showTab('carbos')">Azúcar y carbos</button>
+  <button class="nav-tab" onclick="showTab('ejercicio')">Ejercicio y peso</button>
+  <button class="nav-tab" onclick="showTab('prioridades')">Prioridades</button>
+</nav>
+
+<!-- RESUMEN -->
+<section class="section active" id="resumen">
+  <div class="section-title">Lo que está <em>bien</em> y lo que no</div>
+  <p class="section-desc">Panorama de los indicadores más importantes con base en los últimos laboratorios (marzo 2026) y el historial de 10 checkups desde 2016.</p>
+
+  <div class="metric-grid">
+    <div class="metric-card bad">
+      <div class="metric-label">LDL colesterol</div>
+      <div class="metric-value bad">151</div>
+      <div class="metric-sub">mg/dL · meta: &lt;100 · pico: 162</div>
+    </div>
+    <div class="metric-card warn">
+      <div class="metric-label">Colesterol total</div>
+      <div class="metric-value warn">216</div>
+      <div class="metric-sub">mg/dL · límite 200 · zona riesgo</div>
+    </div>
+    <div class="metric-card good">
+      <div class="metric-label">Triglicéridos</div>
+      <div class="metric-value good">66</div>
+      <div class="metric-sub">mg/dL · excelente (&lt;150)</div>
+    </div>
+    <div class="metric-card good">
+      <div class="metric-label">HDL colesterol</div>
+      <div class="metric-value good">52</div>
+      <div class="metric-sub">mg/dL · mejoró desde 34 en 2016</div>
+    </div>
+    <div class="metric-card good">
+      <div class="metric-label">HbA1c</div>
+      <div class="metric-value good">5.22%</div>
+      <div class="metric-sub">No diabético · muy bien controlado</div>
+    </div>
+    <div class="metric-card good">
+      <div class="metric-label">Glucosa ayuno</div>
+      <div class="metric-value good">90</div>
+      <div class="metric-sub">mg/dL · pico 113 en 2025, corregido</div>
+    </div>
+    <div class="metric-card warn">
+      <div class="metric-label">Linfocitos</div>
+      <div class="metric-value warn">24%</div>
+      <div class="metric-sub">Tendencia baja (era 18% en 2025)</div>
+    </div>
+    <div class="metric-card good">
+      <div class="metric-label">PSA</div>
+      <div class="metric-value good">0.46</div>
+      <div class="metric-sub">ng/mL · muy bajo para 42 años</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="insight-card bad">
+        <div class="insight-title bad">Problema principal</div>
+        El LDL nunca ha bajado de 100 en 10 años. Llegó a 162 en mayo 2025 y sigue en 151. La causa principal es la grasa saturada persistentemente alta: 28g/día en promedio, el doble de la meta recomendada de 15g.
+      </div>
+      <div class="insight-card warn">
+        <div class="insight-title warn">Pendiente crítico</div>
+        Faltan: insulina en ayuno / HOMA-IR, ecografía abdominal (descartar hígado graso), vitamina D, B12, zinc, perfil tiroideo completo, densitometría ósea basal y coproparasitoscópico.
+      </div>
+    </div>
+    <div>
+      <div class="insight-card good">
+        <div class="insight-title good">Lo que funciona</div>
+        Triglicéridos excelentes a pesar de la dieta. HDL subió 53% desde 2016. HbA1c perfecta. Glucosa corregida después del pico de 2025. Función renal y hepática sin problemas. Ejercicio en máximo histórico en 2025.
+      </div>
+      <div class="insight-card">
+        <div class="insight-title neutral">Contexto clave</div>
+        42 años, 79.3 kg (desde 84 en 2015). Camina 1-2h/día, corre 5km tres veces/semana. Ayuno intermitente 16:8 desde hace 5 años. Dieta baja en carbos desde 2022, pero la reducción se compensó con grasa saturada en lugar de grasa insaturada.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GRASA SATURADA -->
+<section class="section" id="grasa">
+  <div class="section-title">Grasa <em>saturada</em></div>
+  <p class="section-desc">El indicador dietético más directamente relacionado con el LDL elevado. 11 años de datos muestran un patrón claro: la reducción de carbos se compensó con más grasa saturada.</p>
+
+  <div class="metric-grid">
+    <div class="metric-card bad">
+      <div class="metric-label">Promedio actual</div>
+      <div class="metric-value bad">28 g</div>
+      <div class="metric-sub">por día · meta: ≤15g</div>
+    </div>
+    <div class="metric-card bad">
+      <div class="metric-label">Días >20g (último año)</div>
+      <div class="metric-value bad">279</div>
+      <div class="metric-sub">de 366 días rastreados (76%)</div>
+    </div>
+    <div class="metric-card warn">
+      <div class="metric-label">Días >25g (último año)</div>
+      <div class="metric-value warn">202</div>
+      <div class="metric-sub">55% de los días rastreados</div>
+    </div>
+    <div class="metric-card bad">
+      <div class="metric-label">Peor día registrado</div>
+      <div class="metric-value bad">60.7g</div>
+      <div class="metric-sub">en un solo día · 4x la meta</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Grasa saturada promedio por año (g/día) <span>Meta: 15g</span></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#e07a5f;"></div>Sobre el límite</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(107,191,142,0.6);"></div>Meta ≤15g</div>
+    </div>
+    <div class="chart-wrap" style="height:240px;">
+      <canvas id="satFatYearChart"></canvas>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title">Promedio por tiempo de comida</div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="satFatMealChart"></canvas>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;">En días con >30g totales, cena sube a 11.5g y comida a 10.4g por sola.</p>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Veces que una comida superó 15g</div>
+      <div style="margin-top:8px;">
+        <div class="bar-row">
+          <span class="bar-label">Cena</span>
+          <div class="bar-track"><div class="bar-fill" style="width:100%;background:#e07a5f;"></div></div>
+          <span class="bar-val" style="color:var(--bad);">370</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Comida</span>
+          <div class="bar-track"><div class="bar-fill" style="width:77%;background:#e07a5f;"></div></div>
+          <span class="bar-val" style="color:var(--bad);">285</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Desayuno</span>
+          <div class="bar-track"><div class="bar-fill" style="width:35%;background:var(--warn);"></div></div>
+          <span class="bar-val" style="color:var(--warn);">~130</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Snacks</span>
+          <div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--muted);"></div></div>
+          <span class="bar-val">Raro</span>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:16px;">Datos 2022–2026. El desayuno está relativamente controlado. Cena y comida son los momentos críticos.</p>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Distribución por percentil (2022–2026)</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Comida</th>
+          <th>50% de días</th>
+          <th>75% de días</th>
+          <th>90% de días</th>
+          <th>Peor día</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Desayuno</td>
+          <td>3.5g</td>
+          <td>7.4g</td>
+          <td><span style="color:var(--warn);">11.5g</span></td>
+          <td><span style="color:var(--bad);">31.7g</span></td>
+        </tr>
+        <tr>
+          <td>Comida</td>
+          <td>4.5g</td>
+          <td>9.9g</td>
+          <td><span style="color:var(--bad);">16.3g</span></td>
+          <td><span style="color:var(--bad);">49.3g</span></td>
+        </tr>
+        <tr>
+          <td>Cena</td>
+          <td>5.5g</td>
+          <td><span style="color:var(--warn);">11.7g</span></td>
+          <td><span style="color:var(--bad);">19.0g</span></td>
+          <td><span style="color:var(--bad);">43.7g</span></td>
+        </tr>
+        <tr>
+          <td>Snacks</td>
+          <td>1.0g</td>
+          <td>2.8g</td>
+          <td>5.4g</td>
+          <td>22.7g</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight-card bad">
+    <div class="insight-title bad">Diagnóstico</div>
+    El 75% de las cenas tienen más de 11.7g de grasa saturada. El 90% de las comidas al mediodía llegan a 16.3g, ya por encima de la meta diaria completa. Los alimentos más probables: queso en cantidad, cortes de carne con grasa visible (costilla, carnitas, chorizo), mantequilla para cocinar, crema. El desayuno y los snacks no son el problema.
+  </div>
+</section>
+
+<!-- CARBOS Y AZUCAR -->
+<section class="section" id="carbos">
+  <div class="section-title">Azúcar y <em>carbohidratos</em></div>
+  <p class="section-desc">Esta es la historia de éxito del historial. Redujiste carbos un 50% y azúcar un 70% entre 2018 y 2026. El precio fue compensar con grasa saturada.</p>
+
+  <div class="metric-grid">
+    <div class="metric-card good">
+      <div class="metric-label">Azúcar hoy</div>
+      <div class="metric-value good">18 g</div>
+      <div class="metric-sub">por día · pico 59g en 2018</div>
+    </div>
+    <div class="metric-card good">
+      <div class="metric-label">Reducción azúcar</div>
+      <div class="metric-value good">-70%</div>
+      <div class="metric-sub">desde 2018 hasta 2026</div>
+    </div>
+    <div class="metric-card neutral">
+      <div class="metric-label">Carbos totales hoy</div>
+      <div class="metric-value neutral">150 g</div>
+      <div class="metric-sub">por día · pico 270g en 2018</div>
+    </div>
+    <div class="metric-card good">
+      <div class="metric-label">Reducción carbos</div>
+      <div class="metric-value good">-50%</div>
+      <div class="metric-sub">desde el pico de 2018</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Carbohidratos y azúcar por año (g/día promedio)</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#c8a96e;"></div>Carbos totales</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7eb0d4;"></div>Carbos netos (sin fibra)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e07a5f;"></div>Azúcar</div>
+    </div>
+    <div class="chart-wrap" style="height:280px;">
+      <canvas id="carbsYearChart"></canvas>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title">Azúcar mensual (2024–2026)</div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="sugarMonthChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Carbos y azúcar por comida (2022–2026)</div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="carbsMealChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-card good">
+    <div class="insight-title good">Lo que esto explica</div>
+    La reducción de azúcar y carbos desde 2021-2022 explica directamente por qué la HbA1c está en 5.22%, por qué los triglicéridos son excelentes (66 mg/dL), y por qué la glucosa que llegó a 113 volvió a 90. Este trabajo funcionó. El ayuno intermitente 16:8 de 5 años también contribuye. El problema no está en los carbohidratos.
+  </div>
+</section>
+
+<!-- EJERCICIO -->
+<section class="section" id="ejercicio">
+  <div class="section-title">Ejercicio y <em>peso</em></div>
+  <p class="section-desc">11 años de datos de actividad física. 2025 fue el mejor año registrado por amplio margen, con casi el doble de sesiones que 2024.</p>
+
+  <div class="metric-grid">
+    <div class="metric-card good">
+      <div class="metric-label">Peso actual (mar 2026)</div>
+      <div class="metric-value good">79.3 kg</div>
+      <div class="metric-sub">Desde 84 kg en 2015 (-5.7 kg)</div>
+    </div>
+    <div class="metric-card good">
+      <div class="metric-label">Sesiones cardio 2025</div>
+      <div class="metric-value good">582</div>
+      <div class="metric-sub">Récord histórico · 41 min prom.</div>
+    </div>
+    <div class="metric-card good">
+      <div class="metric-label">Sesiones 2026 (Q1)</div>
+      <div class="metric-value good">160</div>
+      <div class="metric-sub">44 min promedio · ritmo alto</div>
+    </div>
+    <div class="metric-card neutral">
+      <div class="metric-label">Cal. quemadas 2025</div>
+      <div class="metric-value neutral">108k</div>
+      <div class="metric-sub">kcal totales en ejercicio</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Sesiones de cardio por mes (2024–2026) <span>2025: año récord</span></div>
+    <div class="chart-wrap" style="height:240px;">
+      <canvas id="exerciseChart"></canvas>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title">Peso promedio anual (kg)</div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="weightChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top actividades (min totales histórico)</div>
+      <div style="margin-top:8px;">
+        <div class="bar-row">
+          <span class="bar-label" style="font-size:11px;">Caminata lenta</span>
+          <div class="bar-track"><div class="bar-fill" style="width:100%;background:#7eb0d4;"></div></div>
+          <span class="bar-val">25,747</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="font-size:11px;">Correr 9min/km</span>
+          <div class="bar-track"><div class="bar-fill" style="width:58%;background:#7eb0d4;opacity:0.8;"></div></div>
+          <span class="bar-val">14,889</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="font-size:11px;">Correr 10min/km</span>
+          <div class="bar-track"><div class="bar-fill" style="width:34%;background:#7eb0d4;opacity:0.7;"></div></div>
+          <span class="bar-val">8,814</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="font-size:11px;">Caminata leisurely</span>
+          <div class="bar-track"><div class="bar-fill" style="width:31%;background:#7eb0d4;opacity:0.6;"></div></div>
+          <span class="bar-val">8,048</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="font-size:11px;">Circuito general</span>
+          <div class="bar-track"><div class="bar-fill" style="width:22%;background:#6bbf8e;opacity:0.7;"></div></div>
+          <span class="bar-val">5,624</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="font-size:11px;">Tenis</span>
+          <div class="bar-track"><div class="bar-fill" style="width:13%;background:#6bbf8e;opacity:0.5;"></div></div>
+          <span class="bar-val">3,296</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-title neutral">Nota sobre ejercicio y LDL</div>
+    El ejercicio cardiovascular reduce LDL, pero de forma modesta (5-10% con alto volumen). El impacto de la dieta en el LDL es 3-5 veces mayor que el del ejercicio. Por eso, a pesar del año de ejercicio más activo de la historia en 2025, el LDL bajó solo de 162 a 151. La solución principal está en la dieta, no en agregar más ejercicio.
+  </div>
+</section>
+
+<!-- PRIORIDADES -->
+<section class="section" id="prioridades">
+  <div class="section-title">Plan hacia <em>los 50</em></div>
+  <p class="section-desc">Objetivo: mejores indicadores en 2033 que en 2026. Las acciones están ordenadas por impacto esperado en el LDL y salud cardiovascular.</p>
+
+  <div class="chart-card" style="margin-bottom:20px;">
+    <div class="chart-title">Macros actuales · Últimos 90 días</div>
+    <div class="two-col" style="margin-bottom:0;">
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="macroChart"></canvas>
+      </div>
+      <div style="padding:12px 0;">
+        <div style="margin-bottom:16px;">
+          <div class="bar-row">
+            <span class="bar-label" style="min-width:90px;">Grasa (44%)</span>
+            <div class="bar-track"><div class="bar-fill" style="width:100%;background:#e07a5f;"></div></div>
+            <span class="bar-val">95g/día</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label" style="min-width:90px;">Carbos (31%)</span>
+            <div class="bar-track"><div class="bar-fill" style="width:70%;background:#c8a96e;"></div></div>
+            <span class="bar-val">152g/día</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label" style="min-width:90px;">Proteína (23%)</span>
+            <div class="bar-track"><div class="bar-fill" style="width:52%;background:#7eb0d4;"></div></div>
+            <span class="bar-val">114g/día</span>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);line-height:1.7;">Del total de grasa, el 28% es grasa saturada (26.7g de 95g). La meta es bajar esa fracción a menos del 16% (~15g).</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:20px;">
+    <div class="insight-card bad">
+      <div class="insight-title bad">Prioridad 1 · Impacto alto · Inmediato</div>
+      <strong style="color:var(--text);">Bajar grasa saturada de 28g a 15g/día.</strong><br>
+      Sustituir en cena y comida: queso, mantequilla, carnes grasas (costilla, chorizo, carnitas) por aceite de oliva, aguacate, nueces, pescado azul (salmón, sardinas, macarela). Una reducción de 13g/día puede bajar el LDL entre 15-25 mg/dL, llevándolo de 151 a 126-136 en 3-6 meses.
+    </div>
+    <div class="insight-card warn">
+      <div class="insight-title warn">Prioridad 2 · Estudios pendientes · Urgente</div>
+      <strong style="color:var(--text);">Insulina en ayuno + HOMA-IR y ecografía abdominal.</strong><br>
+      Con el historial de glucosa en 113 (2025) y alta grasa saturada sostenida, hay riesgo de resistencia a la insulina o hígado graso silencioso no detectados. También faltan: vitamina D, B12, zinc, perfil tiroideo completo, densitometría ósea basal.
+    </div>
+    <div class="insight-card">
+      <div class="insight-title neutral">Prioridad 3 · Mantener · Largo plazo</div>
+      <strong style="color:var(--text);">Sostener el nivel de ejercicio de 2025.</strong><br>
+      582 sesiones de cardio anuales con 41 minutos promedio es el mejor año registrado. No bajar de 400 sesiones. El ejercicio ya está funcionando para triglicéridos, HDL, peso y glucosa. Agregar 2 sesiones de fuerza por semana puede mejorar el metabolismo basal y el perfil lipídico.
+    </div>
+    <div class="insight-card good">
+      <div class="insight-title good">Prioridad 4 · Mantener · Ya funciona</div>
+      <strong style="color:var(--text);">No tocar la estrategia de carbos y azúcar.</strong><br>
+      La reducción de azúcar (de 59g a 18g/día) y carbos (de 270g a 150g/día) desde 2022 está directamente detrás de los triglicéridos excelentes (66), la HbA1c perfecta (5.22%) y la glucosa normalizada (90). Esto funciona. El ajuste es solo en el tipo de grasa, no en carbohidratos.
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Proyección LDL con reducción de grasa saturada</div>
+    <div class="chart-wrap" style="height:200px;">
+      <canvas id="ldlProjectionChart"></canvas>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;">Estimación basada en la ecuación de Hegsted: cada gramo de grasa saturada reducido baja el LDL ~1.2-2 mg/dL. Proyección conservadora.</p>
+  </div>
+</section>
+
+<div class="footer">
+  <span>Ricardo Andres Celaya Martinez · 13/06/1983 · Cancún, México</span>
+  <span>Fuentes: MyFitnessPal 2015–2026 + 10 checkups médicos</span>
+</div>
+
+<script>
+Chart.defaults.color = '#888780';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.07)';
+Chart.defaults.font.family = 'Instrument Sans, sans-serif';
+Chart.defaults.font.size = 12;
+
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// SAT FAT BY YEAR
+new Chart(document.getElementById('satFatYearChart'), {
+  type: 'bar',
+  data: {
+    labels: ['2016','2018','2019','2020','2021','2022','2023','2024','2025','2026'],
+    datasets: [
+      {
+        label: 'Grasa saturada',
+        data: [14.1,25.0,27.3,25.1,25.7,28.2,30.6,27.5,28.1,26.7],
+        backgroundColor: d => d.raw > 20 ? 'rgba(224,122,95,0.75)' : 'rgba(224,122,95,0.35)',
+        borderColor: '#e07a5f',
+        borderWidth: 1,
+        borderRadius: 5,
+      },
+      {
+        label: 'Meta 15g',
+        data: Array(10).fill(15),
+        type: 'line',
+        borderColor: 'rgba(107,191,142,0.6)',
+        borderWidth: 1.5,
+        borderDash: [5,4],
+        pointRadius: 0,
+        fill: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { max: 38, ticks: { callback: v => v + 'g' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      x: { ticks: { autoSkip: false }, grid: { display: false } }
+    }
+  }
+});
+
+// SAT FAT BY MEAL
+new Chart(document.getElementById('satFatMealChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Desayuno','Comida','Cena','Snacks'],
+    datasets: [
+      { label: 'Días normales', data: [4.9,6.7,7.8,2.0], backgroundColor: 'rgba(224,122,95,0.55)', borderRadius: 4, borderWidth: 0 },
+      { label: 'Días >30g total', data: [6.3,10.4,11.5,2.4], backgroundColor: 'rgba(224,122,95,0.9)', borderRadius: 4, borderWidth: 0 }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { max: 15, ticks: { callback: v => v + 'g' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      x: { ticks: { autoSkip: false }, grid: { display: false } }
+    }
+  }
+});
+
+// CARBOS BY YEAR
+new Chart(document.getElementById('carbsYearChart'), {
+  type: 'bar',
+  data: {
+    labels: ['2016','2018','2019','2020','2021','2022','2023','2024','2025','2026'],
+    datasets: [
+      { label: 'Carbos totales', data: [155.3,269.9,218.9,235.6,217.0,158.2,132.9,127.3,143.1,150.4], backgroundColor: 'rgba(200,169,110,0.55)', borderColor: '#c8a96e', borderWidth: 1, borderRadius: 4 },
+      { label: 'Carbos netos', data: [140.5,243.7,197.6,213.7,196.1,139.9,117.8,115.0,128.9,135.1], backgroundColor: 'rgba(126,176,212,0.45)', borderColor: '#7eb0d4', borderWidth: 1, borderRadius: 4 },
+      { label: 'Azúcar', type: 'line', data: [39.4,58.9,39.6,41.2,36.1,28.7,21.4,17.1,20.2,17.9], borderColor: '#e07a5f', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#e07a5f', fill: false, tension: 0.35, yAxisID: 'y2' }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { max: 310, ticks: { callback: v => v + 'g' }, grid: { color: 'rgba(255,255,255,0.05)' }, title: { display: true, text: 'Carbos', color: '#c8a96e', font: { size: 11 } } },
+      y2: { position: 'right', max: 80, ticks: { callback: v => v + 'g' }, grid: { display: false }, title: { display: true, text: 'Azúcar', color: '#e07a5f', font: { size: 11 } } },
+      x: { ticks: { autoSkip: false }, grid: { display: false } }
+    }
+  }
+});
+
+// SUGAR MONTHLY
+const sugarMonths = ['Ene24','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene25','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene26','Feb','Mar'];
+const sugarData = [13.2,14.0,17.1,13.8,23.2,22.4,14.6,13.7,17.4,17.6,18.7,19.8,14.6,14.1,19.7,14.0,16.5,16.3,27.3,24.4,20.9,21.4,26.9,25.2,17.3,17.9,18.6];
+new Chart(document.getElementById('sugarMonthChart'), {
+  type: 'line',
+  data: {
+    labels: sugarMonths,
+    datasets: [{ data: sugarData, borderColor: '#e07a5f', backgroundColor: 'rgba(224,122,95,0.08)', borderWidth: 1.5, pointRadius: 2, fill: true, tension: 0.4 }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { max: 35, ticks: { callback: v => v + 'g' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      x: { ticks: { maxTicksLimit: 8 }, grid: { display: false } }
+    }
+  }
+});
+
+// CARBS BY MEAL
+new Chart(document.getElementById('carbsMealChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Desayuno','Comida','Cena','Snacks'],
+    datasets: [
+      { label: 'Carbos', data: [22.7,31.3,36.1,16.6], backgroundColor: 'rgba(200,169,110,0.65)', borderRadius: 4, borderWidth: 0 },
+      { label: 'Azúcar', data: [3.2,4.2,4.6,4.7], backgroundColor: 'rgba(224,122,95,0.65)', borderRadius: 4, borderWidth: 0 }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { ticks: { callback: v => v + 'g' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      x: { ticks: { autoSkip: false }, grid: { display: false } }
+    }
+  }
+});
+
+// EXERCISE MONTHLY
+const exMonths = ['Ene24','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene25','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene26','Feb','Mar'];
+const exSessions = [18,20,17,12,12,16,7,18,15,11,17,27,37,19,36,27,44,44,56,85,73,56,51,54,65,47,48];
+new Chart(document.getElementById('exerciseChart'), {
+  type: 'bar',
+  data: {
+    labels: exMonths,
+    datasets: [{
+      data: exSessions,
+      backgroundColor: exSessions.map(v => v >= 40 ? 'rgba(107,191,142,0.8)' : v >= 20 ? 'rgba(107,191,142,0.4)' : 'rgba(107,191,142,0.2)'),
+      borderRadius: 4,
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { ticks: { callback: v => v + ' ses.' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      x: { ticks: { maxTicksLimit: 10 }, grid: { display: false } }
+    }
+  }
+});
+
+// WEIGHT
+new Chart(document.getElementById('weightChart'), {
+  type: 'line',
+  data: {
+    labels: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026'],
+    datasets: [{
+      data: [83.1,81.5,81.5,83.1,79.1,79.9,83.5,81.1,81.0,81.4,79.8,79.3],
+      borderColor: '#7eb0d4',
+      backgroundColor: 'rgba(126,176,212,0.07)',
+      borderWidth: 2,
+      pointRadius: 4,
+      pointBackgroundColor: '#7eb0d4',
+      fill: true,
+      tension: 0.35,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { min: 76, max: 87, ticks: { callback: v => v + ' kg' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      x: { ticks: { maxTicksLimit: 8 }, grid: { display: false } }
+    }
+  }
+});
+
+// MACRO DONUT
+new Chart(document.getElementById('macroChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Grasa 44%','Carbos 31%','Proteína 23%'],
+    datasets: [{
+      data: [44,31,23],
+      backgroundColor: ['#e07a5f','#c8a96e','#7eb0d4'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '60%',
+    plugins: { legend: { display: false } }
+  }
+});
+
+// LDL PROJECTION
+new Chart(document.getElementById('ldlProjectionChart'), {
+  type: 'line',
+  data: {
+    labels: ['Actual','−5g sat fat','−10g sat fat','−13g sat fat (meta)','−13g + ejercicio'],
+    datasets: [
+      {
+        label: 'LDL proyectado',
+        data: [151,141,132,126,120],
+        borderColor: '#c8a96e',
+        backgroundColor: 'rgba(200,169,110,0.08)',
+        borderWidth: 2,
+        pointRadius: 6,
+        pointBackgroundColor: d => {
+          const vals = [151,141,132,126,120];
+          const v = vals[d.dataIndex];
+          return v < 130 ? '#6bbf8e' : v < 145 ? '#e8a14a' : '#e07a5f';
+        },
+        fill: true,
+        tension: 0.2,
+      },
+      {
+        label: 'Meta LDL',
+        data: Array(5).fill(100),
+        borderColor: 'rgba(107,191,142,0.4)',
+        borderWidth: 1,
+        borderDash: [5,4],
+        pointRadius: 0,
+        fill: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { min: 90, max: 165, ticks: { callback: v => v + ' mg/dL' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      x: { grid: { display: false }, ticks: { maxRotation: 0, font: { size: 11 } } }
+    }
+  }
+});
+</script>
+</body>
+</html>
